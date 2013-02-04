@@ -373,7 +373,7 @@ class Position(object):
         # midnight?
         payment = 0.0
         for dividend in self.dividends:
-            if dt == dividend.ex_date and self.amount > 0:
+            if dt == dividend.ex_date:
                 # if we own shares at midnight of the div_ex date
                 # we are entitled to the dividend.
                 dividend.amount_on_ex_date = self.amount
