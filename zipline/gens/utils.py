@@ -57,7 +57,8 @@ def hash_args(*args, **kwargs):
     return hasher.hexdigest()
 
 
-def create_trade(sid, price, amount, datetime, source_id="test_factory"):
+def create_trade(sid, price, amount, datetime,
+        source_id="test_factory", txn=None):
 
     trade = Event()
 
@@ -71,6 +72,7 @@ def create_trade(sid, price, amount, datetime, source_id="test_factory"):
     trade.low = price * .95
     trade.high = price * 1.05
     trade.volume = amount
+    trade.TRANSACTION = txn
 
     return trade
 
