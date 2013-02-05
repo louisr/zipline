@@ -41,10 +41,9 @@ class TestDividendPerformance(unittest.TestCase):
     def setUp(self):
 
         self.trading_environment, self.dt, self.end_dt = \
-                create_random_trading_environment()
+            create_random_trading_environment()
 
         self.trading_environment.capital_base = 10e3
-
 
     def test_long_position_receives_dividend(self):
         #post some trades in the market
@@ -57,20 +56,20 @@ class TestDividendPerformance(unittest.TestCase):
         )
 
         dividend = factory.create_dividend(
-                1,
-                10.00,
-                events[0].dt,
-                events[1].dt,
-                events[2].dt
-            )
+            1,
+            10.00,
+            events[0].dt,
+            events[1].dt,
+            events[2].dt
+        )
 
         events.insert(1, dividend)
         txn = factory.create_txn(1, 10.0, 100, self.dt+oneday)
         events[2].TRANSACTION = txn
         perf_tracker = perf.PerformanceTracker(self.trading_environment)
         transformed_events = list(perf_tracker.transform(
-                        ((event.dt, [event]) for event in events))
-                  )
+            ((event.dt, [event]) for event in events))
+        )
 
         #flatten the list of events
         results = []
@@ -79,24 +78,26 @@ class TestDividendPerformance(unittest.TestCase):
                 for message in event.perf_messages:
                     results.append(message)
 
-
         perf_messages, risk = perf_tracker.handle_simulation_end()
         results.append(perf_messages[0])
 
         self.assertEqual(results[0]['daily_perf']['period_open'], events[0].dt)
-        self.assertEqual(results[-1]['daily_perf']['period_open'], events[-1].dt)
+        self.assertEqual(
+            results[-1]['daily_perf']['period_open'],
+            events[-1].dt
+        )
 
         self.assertEqual(len(results), 5)
         cumulative_returns = \
-                [event['cumulative_perf']['returns'] for event in results]
-        self.assertEqual(cumulative_returns,[0.0, 0.0, 0.1, 0.1, 0.1])
+            [event['cumulative_perf']['returns'] for event in results]
+        self.assertEqual(cumulative_returns, [0.0, 0.0, 0.1, 0.1, 0.1])
         daily_returns = [event['daily_perf']['returns'] for event in results]
-        self.assertEqual(daily_returns,[0.0, 0.0, 0.10, 0.0, 0.0])
+        self.assertEqual(daily_returns, [0.0, 0.0, 0.10, 0.0, 0.0])
         cash_flows = [event['daily_perf']['capital_used'] for event in results]
-        self.assertEqual(cash_flows,[0,-1000,1000,0,0])
+        self.assertEqual(cash_flows, [0, -1000, 1000, 0, 0])
         cumulative_cash_flows = \
-                [event['cumulative_perf']['capital_used'] for event in results]
-        self.assertEqual(cumulative_cash_flows,[0,-1000,0,0,0])
+            [event['cumulative_perf']['capital_used'] for event in results]
+        self.assertEqual(cumulative_cash_flows, [0, -1000, 0, 0, 0])
 
     def test_post_ex_long_position_receives_no_dividend(self):
         #post some trades in the market
@@ -109,20 +110,20 @@ class TestDividendPerformance(unittest.TestCase):
         )
 
         dividend = factory.create_dividend(
-                1,
-                10.00,
-                events[0].dt,
-                events[1].dt,
-                events[2].dt
-            )
+            1,
+            10.00,
+            events[0].dt,
+            events[1].dt,
+            events[2].dt
+        )
 
         events.insert(1, dividend)
         txn = factory.create_txn(1, 10.0, 100, events[3].dt)
         events[3].TRANSACTION = txn
         perf_tracker = perf.PerformanceTracker(self.trading_environment)
         transformed_events = list(perf_tracker.transform(
-                        ((event.dt, [event]) for event in events))
-                  )
+            ((event.dt, [event]) for event in events))
+        )
 
         #flatten the list of events
         results = []
@@ -131,22 +132,20 @@ class TestDividendPerformance(unittest.TestCase):
                 for message in event.perf_messages:
                     results.append(message)
 
-
         perf_messages, risk = perf_tracker.handle_simulation_end()
         results.append(perf_messages[0])
 
         self.assertEqual(len(results), 5)
         cumulative_returns = \
-                [event['cumulative_perf']['returns'] for event in results]
-        self.assertEqual(cumulative_returns,[0, 0, 0, 0, 0])
+            [event['cumulative_perf']['returns'] for event in results]
+        self.assertEqual(cumulative_returns, [0, 0, 0, 0, 0])
         daily_returns = [event['daily_perf']['returns'] for event in results]
-        self.assertEqual(daily_returns,[0, 0, 0, 0, 0])
+        self.assertEqual(daily_returns, [0, 0, 0, 0, 0])
         cash_flows = [event['daily_perf']['capital_used'] for event in results]
-        self.assertEqual(cash_flows,[0,0,-1000,0,0])
+        self.assertEqual(cash_flows, [0, 0, -1000, 0, 0])
         cumulative_cash_flows = \
-                [event['cumulative_perf']['capital_used'] for event in results]
-        self.assertEqual(cumulative_cash_flows,[0,0,-1000,-1000,-1000])
-
+            [event['cumulative_perf']['capital_used'] for event in results]
+        self.assertEqual(cumulative_cash_flows, [0, 0, -1000, -1000, -1000])
 
     def test_selling_before_dividend_payment_still_gets_paid(self):
         #post some trades in the market
@@ -159,12 +158,12 @@ class TestDividendPerformance(unittest.TestCase):
         )
 
         dividend = factory.create_dividend(
-                1,
-                10.00,
-                events[0].dt,
-                events[1].dt,
-                events[3].dt
-            )
+            1,
+            10.00,
+            events[0].dt,
+            events[1].dt,
+            events[3].dt
+        )
 
         buy_txn = factory.create_txn(1, 10.0, 100, events[1].dt)
         events[1].TRANSACTION = buy_txn
@@ -173,8 +172,8 @@ class TestDividendPerformance(unittest.TestCase):
         events.insert(1, dividend)
         perf_tracker = perf.PerformanceTracker(self.trading_environment)
         transformed_events = list(perf_tracker.transform(
-                        ((event.dt, [event]) for event in events))
-                  )
+            ((event.dt, [event]) for event in events))
+        )
 
         #flatten the list of events
         results = []
@@ -183,21 +182,20 @@ class TestDividendPerformance(unittest.TestCase):
                 for message in event.perf_messages:
                     results.append(message)
 
-
         perf_messages, risk = perf_tracker.handle_simulation_end()
         results.append(perf_messages[0])
 
         self.assertEqual(len(results), 5)
         cumulative_returns = \
-                [event['cumulative_perf']['returns'] for event in results]
-        self.assertEqual(cumulative_returns,[0, 0, 0, 0.1, 0.1])
+            [event['cumulative_perf']['returns'] for event in results]
+        self.assertEqual(cumulative_returns, [0, 0, 0, 0.1, 0.1])
         daily_returns = [event['daily_perf']['returns'] for event in results]
-        self.assertEqual(daily_returns,[0, 0, 0, 0.1, 0])
+        self.assertEqual(daily_returns, [0, 0, 0, 0.1, 0])
         cash_flows = [event['daily_perf']['capital_used'] for event in results]
-        self.assertEqual(cash_flows,[0,-1000,1000,1000,0])
+        self.assertEqual(cash_flows, [0, -1000, 1000, 1000, 0])
         cumulative_cash_flows = \
-                [event['cumulative_perf']['capital_used'] for event in results]
-        self.assertEqual(cumulative_cash_flows,[0,-1000,0,1000,1000])
+            [event['cumulative_perf']['capital_used'] for event in results]
+        self.assertEqual(cumulative_cash_flows, [0, -1000, 0, 1000, 1000])
 
     def test_buy_and_sell_before_ex(self):
         #post some trades in the market
@@ -210,12 +208,12 @@ class TestDividendPerformance(unittest.TestCase):
         )
 
         dividend = factory.create_dividend(
-                1,
-                10.00,
-                events[3].dt,
-                events[4].dt,
-                events[5].dt
-            )
+            1,
+            10.00,
+            events[3].dt,
+            events[4].dt,
+            events[5].dt
+        )
 
         buy_txn = factory.create_txn(1, 10.0, 100, events[1].dt)
         events[1].TRANSACTION = buy_txn
@@ -224,8 +222,8 @@ class TestDividendPerformance(unittest.TestCase):
         events.insert(1, dividend)
         perf_tracker = perf.PerformanceTracker(self.trading_environment)
         transformed_events = list(perf_tracker.transform(
-                        ((event.dt, [event]) for event in events))
-                  )
+            ((event.dt, [event]) for event in events))
+        )
 
         #flatten the list of events
         results = []
@@ -234,23 +232,20 @@ class TestDividendPerformance(unittest.TestCase):
                 for message in event.perf_messages:
                     results.append(message)
 
-
         perf_messages, risk = perf_tracker.handle_simulation_end()
         results.append(perf_messages[0])
 
         self.assertEqual(len(results), 6)
         cumulative_returns = \
-                [event['cumulative_perf']['returns'] for event in results]
-        self.assertEqual(cumulative_returns,[0, 0, 0, 0, 0, 0])
+            [event['cumulative_perf']['returns'] for event in results]
+        self.assertEqual(cumulative_returns, [0, 0, 0, 0, 0, 0])
         daily_returns = [event['daily_perf']['returns'] for event in results]
-        self.assertEqual(daily_returns,[0, 0, 0, 0, 0, 0])
+        self.assertEqual(daily_returns, [0, 0, 0, 0, 0, 0])
         cash_flows = [event['daily_perf']['capital_used'] for event in results]
-        self.assertEqual(cash_flows,[0,-1000,1000,0,0,0])
+        self.assertEqual(cash_flows, [0, -1000, 1000, 0, 0, 0])
         cumulative_cash_flows = \
-                [event['cumulative_perf']['capital_used'] for event in results]
-        self.assertEqual(cumulative_cash_flows,[0,-1000,0,0,0,0])
-
-
+            [event['cumulative_perf']['capital_used'] for event in results]
+        self.assertEqual(cumulative_cash_flows, [0, -1000, 0, 0, 0, 0])
 
     def test_ending_before_payment_date(self):
         #post some trades in the market
@@ -263,20 +258,20 @@ class TestDividendPerformance(unittest.TestCase):
         )
 
         dividend = factory.create_dividend(
-                1,
-                10.00,
-                events[0].dt,
-                events[1].dt,
-                events[-1].dt + 10*oneday
-            )
+            1,
+            10.00,
+            events[0].dt,
+            events[1].dt,
+            events[-1].dt + 10*oneday
+        )
 
         buy_txn = factory.create_txn(1, 10.0, 100, events[1].dt)
         events[1].TRANSACTION = buy_txn
         events.insert(1, dividend)
         perf_tracker = perf.PerformanceTracker(self.trading_environment)
         transformed_events = list(perf_tracker.transform(
-                        ((event.dt, [event]) for event in events))
-                  )
+            ((event.dt, [event]) for event in events))
+        )
 
         #flatten the list of events
         results = []
@@ -285,23 +280,23 @@ class TestDividendPerformance(unittest.TestCase):
                 for message in event.perf_messages:
                     results.append(message)
 
-
         perf_messages, risk = perf_tracker.handle_simulation_end()
         results.append(perf_messages[0])
 
         self.assertEqual(len(results), 5)
         cumulative_returns = \
-                [event['cumulative_perf']['returns'] for event in results]
-        self.assertEqual(cumulative_returns,[0, 0, 0, 0.0, 0.0])
+            [event['cumulative_perf']['returns'] for event in results]
+        self.assertEqual(cumulative_returns, [0, 0, 0, 0.0, 0.0])
         daily_returns = [event['daily_perf']['returns'] for event in results]
-        self.assertEqual(daily_returns,[0, 0, 0, 0, 0])
+        self.assertEqual(daily_returns, [0, 0, 0, 0, 0])
         cash_flows = [event['daily_perf']['capital_used'] for event in results]
-        self.assertEqual(cash_flows,[0,-1000,0,0,0])
+        self.assertEqual(cash_flows, [0, -1000, 0, 0, 0])
         cumulative_cash_flows = \
-                [event['cumulative_perf']['capital_used'] for event in results]
-        self.assertEqual(cumulative_cash_flows,[0,-1000,-1000,-1000,-1000])
-
-
+            [event['cumulative_perf']['capital_used'] for event in results]
+        self.assertEqual(
+            cumulative_cash_flows,
+            [0, -1000, -1000, -1000, -1000]
+        )
 
     def test_short_position_receives_no_dividend(self):
         #post some trades in the market
@@ -314,20 +309,20 @@ class TestDividendPerformance(unittest.TestCase):
         )
 
         dividend = factory.create_dividend(
-                1,
-                10.00,
-                events[0].dt,
-                events[1].dt,
-                events[2].dt
-            )
+            1,
+            10.00,
+            events[0].dt,
+            events[1].dt,
+            events[2].dt
+        )
 
         events.insert(1, dividend)
         txn = factory.create_txn(1, 10.0, -100, self.dt+oneday)
         events[2].TRANSACTION = txn
         perf_tracker = perf.PerformanceTracker(self.trading_environment)
         transformed_events = list(perf_tracker.transform(
-                        ((event.dt, [event]) for event in events))
-                  )
+            ((event.dt, [event]) for event in events))
+        )
 
         #flatten the list of events
         results = []
@@ -336,21 +331,20 @@ class TestDividendPerformance(unittest.TestCase):
                 for message in event.perf_messages:
                     results.append(message)
 
-
         perf_messages, risk = perf_tracker.handle_simulation_end()
         results.append(perf_messages[0])
 
         self.assertEqual(len(results), 5)
         cumulative_returns = \
-                [event['cumulative_perf']['returns'] for event in results]
-        self.assertEqual(cumulative_returns,[0.0, 0.0, 0.0, 0.0, 0.0])
+            [event['cumulative_perf']['returns'] for event in results]
+        self.assertEqual(cumulative_returns, [0.0, 0.0, 0.0, 0.0, 0.0])
         daily_returns = [event['daily_perf']['returns'] for event in results]
-        self.assertEqual(daily_returns,[0.0, 0.0, 0.0, 0.0, 0.0])
+        self.assertEqual(daily_returns, [0.0, 0.0, 0.0, 0.0, 0.0])
         cash_flows = [event['daily_perf']['capital_used'] for event in results]
-        self.assertEqual(cash_flows,[0,1000,0,0,0])
+        self.assertEqual(cash_flows, [0, 1000, 0, 0, 0])
         cumulative_cash_flows = \
-                [event['cumulative_perf']['capital_used'] for event in results]
-        self.assertEqual(cumulative_cash_flows,[0,1000,1000,1000,1000])
+            [event['cumulative_perf']['capital_used'] for event in results]
+        self.assertEqual(cumulative_cash_flows, [0, 1000, 1000, 1000, 1000])
 
     def test_no_position_receives_no_dividend(self):
         #post some trades in the market
@@ -363,18 +357,18 @@ class TestDividendPerformance(unittest.TestCase):
         )
 
         dividend = factory.create_dividend(
-                1,
-                10.00,
-                events[0].dt,
-                events[1].dt,
-                events[2].dt
-            )
+            1,
+            10.00,
+            events[0].dt,
+            events[1].dt,
+            events[2].dt
+        )
 
         events.insert(1, dividend)
         perf_tracker = perf.PerformanceTracker(self.trading_environment)
         transformed_events = list(perf_tracker.transform(
-                        ((event.dt, [event]) for event in events))
-                  )
+            ((event.dt, [event]) for event in events))
+        )
 
         #flatten the list of events
         results = []
@@ -383,30 +377,27 @@ class TestDividendPerformance(unittest.TestCase):
                 for message in event.perf_messages:
                     results.append(message)
 
-
         perf_messages, risk = perf_tracker.handle_simulation_end()
         results.append(perf_messages[0])
 
         self.assertEqual(len(results), 5)
         cumulative_returns = \
-                [event['cumulative_perf']['returns'] for event in results]
-        self.assertEqual(cumulative_returns,[0.0, 0.0, 0.0, 0.0, 0.0])
+            [event['cumulative_perf']['returns'] for event in results]
+        self.assertEqual(cumulative_returns, [0.0, 0.0, 0.0, 0.0, 0.0])
         daily_returns = [event['daily_perf']['returns'] for event in results]
-        self.assertEqual(daily_returns,[0.0, 0.0, 0.0, 0.0, 0.0])
+        self.assertEqual(daily_returns, [0.0, 0.0, 0.0, 0.0, 0.0])
         cash_flows = [event['daily_perf']['capital_used'] for event in results]
-        self.assertEqual(cash_flows,[0,0,0,0,0])
+        self.assertEqual(cash_flows, [0, 0, 0, 0, 0])
         cumulative_cash_flows = \
-                [event['cumulative_perf']['capital_used'] for event in results]
-        self.assertEqual(cumulative_cash_flows,[0,0,0,0,0])
-
+            [event['cumulative_perf']['capital_used'] for event in results]
+        self.assertEqual(cumulative_cash_flows, [0, 0, 0, 0, 0])
 
 
 class TestPositionPerformance(unittest.TestCase):
 
     def setUp(self):
         self.trading_environment, self.dt, self.end_dt = \
-                create_random_trading_environment()
-
+            create_random_trading_environment()
 
     def test_long_position(self):
         """

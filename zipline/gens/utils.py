@@ -58,7 +58,7 @@ def hash_args(*args, **kwargs):
 
 
 def create_trade(sid, price, amount, datetime,
-        source_id="test_factory", txn=None):
+                 source_id="test_factory", txn=None):
 
     trade = Event()
 

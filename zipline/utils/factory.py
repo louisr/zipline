@@ -152,7 +152,6 @@ check treasury and benchmark data in findb, and re-run the test."""
         return trading_environment, start_dt, end_dt
 
 
-
 def get_next_trading_dt(current, interval, trading_calendar):
     next = current
     while True:
@@ -185,7 +184,7 @@ def create_dividend(sid, payment, declared_date, ex_date, payment_date):
         'dt': declared_date.replace(hour=0, minute=0, second=0),
         'ex_date': ex_date.replace(hour=0, minute=0, second=0),
         'payment_date': payment_date.replace(hour=0, minute=0, second=0),
-        'type' : DATASOURCE_TYPE.DIVIDEND
+        'type': DATASOURCE_TYPE.DIVIDEND
     })
 
     return div

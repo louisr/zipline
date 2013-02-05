@@ -252,7 +252,9 @@ class PerformanceTracker(object):
 
             if event.TRANSACTION:
                 self.txn_count += 1
-                self.cumulative_performance.execute_transaction(event.TRANSACTION)
+                self.cumulative_performance.execute_transaction(
+                    event.TRANSACTION
+                )
                 self.todays_performance.execute_transaction(event.TRANSACTION)
 
             #update last sale
@@ -655,10 +657,6 @@ class PerformancePeriod(object):
             position.amount = pos.amount
             position.cost_basis = pos.cost_basis
             position.last_sale_price = pos.last_sale_price
-
-            #TODO: this is probably a performance bug
-            import copy
-            position.dividends = copy.deepcopy(pos.dividends)
 
         return positions
 
